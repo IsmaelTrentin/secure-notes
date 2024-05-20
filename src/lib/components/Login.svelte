@@ -1,40 +1,33 @@
 <script lang="ts">
-	// TODO: style component
-
-	import Button from './ui/button/button.svelte';
 	import { invoke } from '@tauri-apps/api';
 	import { app } from '$lib/stores/app';
 	import * as Card from '$lib/components/ui/card/index.js';
+	import * as Form from '$lib/components/ui/form';
+
 	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
 	import { z } from 'zod';
+	import { defaults, setError, setMessage, superForm } from 'sveltekit-superforms';
+	import { zod } from 'sveltekit-superforms/adapters';
 
-	export const formSchema = z.string().min(1);
+	const formSchema = z.object({
+		masterPw: z.string().min(1)
+	});
 
-	let masterPw: string;
-	let errorMsg = '';
-
-	const auth = async (e: MouseEvent) => {
-		// e.preventDefault();
-
-		try {
-			formSchema.parse(masterPw);
-		} catch (error) {
-			console.log(error);
-
-			const err = error as Zod.ZodError;
-			errorMsg = err.errors[0].message;
-			return;
+	const form = superForm(defaults(zod(formSchema)), {
+		SPA: true,
+		validators: zod(formSchema),
+		async onUpdate({ form }) {
+			$app.loading = true;
+			try {
+				await invoke<string>('authenticate', { masterPw: form.data.masterPw });
+				setMessage(form, 'Auth ok');
+			} catch (error) {
+				setError(form, 'masterPw', error as unknown as string);
+			}
+			$app.loading = false;
 		}
-
-		$app.loading = true;
-		await invoke<never>('authenticate');
-		$app.loading = false;
-	};
-
-	const clearErrors = () => {
-		errorMsg = '';
-	};
+	});
+	const { form: formData, enhance } = form;
 </script>
 
 <div class="h-full w-full">
@@ -45,28 +38,19 @@
 				<Card.Description>Authenticate using your master password.</Card.Description>
 			</Card.Header>
 			<Card.Content>
-				<form>
-					<div class="grid w-full items-center gap-4">
-						<div class="flex flex-col space-y-1.5">
-							<Label for="name">Master Password</Label>
-							<Input
-								id="name"
-								placeholder="qwerty123"
-								bind:value={masterPw}
-								on:input={clearErrors}
-							/>
-							{#if errorMsg}
-								<p class="text-sm text-red-500">{errorMsg}</p>
-							{/if}
-						</div>
-					</div>
+				<form method="POST" use:enhance>
+					<Form.Field {form} name="masterPw">
+						<Form.Control let:attrs>
+							<Form.Label>Master Password</Form.Label>
+							<Input {...attrs} bind:value={$formData.masterPw} type="password" />
+						</Form.Control>
+						<Form.FieldErrors />
+					</Form.Field>
+
+					<div class="mt-8"></div>
+					<Form.Button class="w-full" disabled={$app.loading}>Submit</Form.Button>
 				</form>
 			</Card.Content>
-			<Card.Footer class="flex items-end">
-				<Button on:click={auth} type="submit" disabled={$app.loading} class="w-full"
-					>Authenticate</Button
-				>
-			</Card.Footer>
 		</Card.Root>
 	</div>
 </div>

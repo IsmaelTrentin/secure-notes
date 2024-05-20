@@ -2,8 +2,10 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod commands;
+mod security;
 
 use std::fs::{read_to_string, write};
+use std::string::FromUtf8Error;
 use std::sync::Mutex;
 
 use commands::authenticate::authenticate;
@@ -21,6 +23,10 @@ pub enum Error {
     Io(#[from] std::io::Error),
     #[error("the mutex was poisoned")]
     PoisonError(String),
+    #[error("wrong password")]
+    WrongPassword,
+    #[error("bad utf8 data")]
+    FromUtf8Error,
 }
 impl serde::Serialize for Error {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -33,6 +39,11 @@ impl serde::Serialize for Error {
 impl<T> From<std::sync::PoisonError<T>> for Error {
     fn from(err: std::sync::PoisonError<T>) -> Self {
         Error::PoisonError(err.to_string())
+    }
+}
+impl From<FromUtf8Error> for Error {
+    fn from(_err: FromUtf8Error) -> Self {
+        Error::FromUtf8Error
     }
 }
 

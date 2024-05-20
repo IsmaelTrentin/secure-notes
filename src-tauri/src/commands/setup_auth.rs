@@ -1,7 +1,12 @@
 use std::{fs::write, sync::Mutex};
 use tauri::{Manager, State};
 
-use crate::{AppState, Error};
+use crate::{
+    security::{encrypt, hash_key},
+    AppState, Error,
+};
+
+const AUTH_CHECK_STR: &str = "The fox jumps.";
 
 #[tauri::command]
 pub async fn setup_auth(
@@ -12,14 +17,15 @@ pub async fn setup_auth(
     let mut state = state_mutex.lock()?;
     state.needs_auth_setup = false;
 
-    // TODO: encrypt
     let data_path = app
         .path_resolver()
         .app_data_dir()
         .expect("failed to resolve data path");
     let auth_file_path = data_path.join("master.auth");
 
-    write(auth_file_path, &master_pw).expect("failed to write auth file");
+    let key_hash_64 = hash_key(&master_pw);
+    let encrypted_data = encrypt(&key_hash_64, AUTH_CHECK_STR);
+    write(auth_file_path, &encrypted_data).expect("failed to write auth file");
 
     let _ = app.emit_all("auth_setup_ok", ());
 
