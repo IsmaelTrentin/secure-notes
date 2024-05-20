@@ -11,7 +11,7 @@ pub async fn authenticate(
     let mut state = state_mutex.lock()?;
     state.authenticated = true;
 
-    app.emit_all("auth_ok", ());
+    let _ = app.emit_all("auth_ok", ());
 
     Ok(())
 }

@@ -11,7 +11,7 @@ pub async fn logout(
     let mut state = state_mutex.lock()?;
     state.authenticated = false;
 
-    app.emit_all("logout", ());
+    let _ = app.emit_all("logout", ());
 
     Ok(())
 }
