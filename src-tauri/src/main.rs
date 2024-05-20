@@ -8,11 +8,9 @@ use std::fs::{read_to_string, write};
 use std::string::FromUtf8Error;
 use std::sync::Mutex;
 
-use commands::authenticate::authenticate;
-use commands::is_authenticated::is_authenticated;
+use commands::authenticate::{authenticate, is_authenticated};
 use commands::logout::logout;
-use commands::needs_auth_setup::needs_auth_setup;
-use commands::setup_auth::setup_auth;
+use commands::setup_auth::{needs_auth_setup, setup_auth};
 
 use serde::{Deserialize, Serialize};
 use tauri::Manager;

@@ -12,6 +12,8 @@ const AES_KEY_LEN: u8 = 32;
 const SHA256_LEN: u8 = 64;
 const HASH_RUNS: usize = 500;
 
+pub const AUTH_CHECK_STR: &str = "The fox jumps.";
+
 fn do_hash_runs(input: &str) -> String {
     let mut data = input.to_string();
 
@@ -53,7 +55,6 @@ pub fn encrypt(key_hash_64: &str, plaintext: &str) -> Vec<u8> {
     let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
     let after_runs = do_hash_runs(key_hash_64);
     let key_str = pick_32_from_hash_key_64(nonce[0], &after_runs);
-    println!("{}\n{}\n{}", key_hash_64, after_runs, key_str);
 
     let key = Key::<Aes256>::from_slice(key_str.as_bytes());
 
@@ -73,7 +74,6 @@ pub fn decrypt(key_hash_64: &str, encrypted_data: Vec<u8>) -> Result<String, Err
     let nonce = Nonce::from_slice(nonce_arr);
     let after_runs = do_hash_runs(key_hash_64);
     let key_str = pick_32_from_hash_key_64(nonce[0], &after_runs);
-    println!("{}\n{}\n{}", key_hash_64, after_runs, key_str);
 
     let key = Key::<Aes256Gcm>::from_slice(key_str.as_bytes());
 

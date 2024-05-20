@@ -16,7 +16,11 @@
 	const form = superForm(defaults(zod(formSchema)), {
 		SPA: true,
 		validators: zod(formSchema),
-		async onUpdate({ form }) {
+		async onUpdate({ form, result }) {
+			if (result.type === 'failure') {
+				return;
+			}
+
 			$app.loading = true;
 			try {
 				await invoke<string>('authenticate', { masterPw: form.data.masterPw });

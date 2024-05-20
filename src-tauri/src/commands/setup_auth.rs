@@ -2,11 +2,9 @@ use std::{fs::write, sync::Mutex};
 use tauri::{Manager, State};
 
 use crate::{
-    security::{encrypt, hash_key},
+    security::{encrypt, hash_key, AUTH_CHECK_STR},
     AppState, Error,
 };
-
-const AUTH_CHECK_STR: &str = "The fox jumps.";
 
 #[tauri::command]
 pub async fn setup_auth(
@@ -30,4 +28,11 @@ pub async fn setup_auth(
     let _ = app.emit_all("auth_setup_ok", ());
 
     Ok(())
+}
+
+#[tauri::command]
+pub fn needs_auth_setup(state_mutex: State<'_, Mutex<AppState>>) -> Result<bool, Error> {
+    let state = state_mutex.lock()?;
+
+    Ok(state.needs_auth_setup)
 }
