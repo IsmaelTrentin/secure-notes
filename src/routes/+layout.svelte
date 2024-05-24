@@ -27,13 +27,13 @@
 	});
 </script>
 
-<div class="app">
+<div class="app h-full">
 	<ModeWatcher />
 
 	{#if needs_auth_setup}
 		<AuthSetup />
 	{:else if $app.authed}
-		<main>
+		<main class="h-full">
 			<slot></slot>
 		</main>
 	{:else}

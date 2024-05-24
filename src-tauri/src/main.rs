@@ -23,6 +23,8 @@ pub enum Error {
     PoisonError(String),
     #[error("wrong password")]
     WrongPassword,
+    #[error("unauthorized")]
+    Unauthorized,
     #[error("bad utf8 data")]
     FromUtf8Error,
 }
@@ -52,6 +54,9 @@ pub struct AppState {
     pub conf: AppConfig,
     #[serde(skip_serializing)]
     pub needs_auth_setup: bool,
+
+    #[serde(skip_serializing)]
+    pub key_hash_64: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -104,6 +109,7 @@ fn main() {
                 authenticated: false,
                 conf,
                 needs_auth_setup,
+                key_hash_64: None,
             }));
 
             Ok(())
