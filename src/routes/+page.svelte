@@ -1,54 +1,74 @@
-<script lang="ts">
-	import { Button } from '$lib/components/ui/button';
-	import Sun from 'svelte-radix/Sun.svelte';
-	import Moon from 'svelte-radix/Moon.svelte';
-	import { toggleMode } from 'mode-watcher';
-	import Label from '$lib/components/ui/label/label.svelte';
-	import Textarea from '$lib/components/ui/textarea/textarea.svelte';
-	import { invoke } from '@tauri-apps/api';
-	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
+<div class="flex h-full w-full flex-col items-center justify-center gap-5 bg-zinc-900">
+	<div class="flex w-96 items-center justify-between">
+		<h1 class="select-none text-2xl tracking-tight text-muted-foreground text-opacity-30">
+			Command Palette
+		</h1>
+		<kbd
+			class="pointer-events-none inline-flex h-10 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-muted-foreground opacity-100"
+		>
+			<span class="text-lg font-light">⌘</span>
+			<span class="text-2xl font-thin">↑</span>
+			<span class="text-2xl font-thin">P</span>
+		</kbd>
+	</div>
 
-	let text: string;
+	<div class="flex w-96 items-center justify-between">
+		<h1 class="select-none text-2xl tracking-tight text-muted-foreground text-opacity-30">
+			New File
+		</h1>
+		<kbd
+			class="pointer-events-none inline-flex h-10 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-muted-foreground opacity-100"
+		>
+			<span class="text-lg font-light">⌘</span>
+			<span class="text-2xl font-thin">N</span>
+		</kbd>
+	</div>
 
-	const logout = async () => {
-		await invoke<never>('logout');
-	};
-</script>
+	<div class="flex w-96 items-center justify-between">
+		<h1 class="select-none text-2xl tracking-tight text-muted-foreground text-opacity-30">
+			Open File
+		</h1>
+		<kbd
+			class="pointer-events-none inline-flex h-10 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-muted-foreground opacity-100"
+		>
+			<span class="text-lg font-light">⌘</span>
+			<span class="text-2xl font-thin">P</span>
+		</kbd>
+	</div>
 
-<div class="flex h-full flex-grow flex-row">
-	<div class="w-60 min-w-60 bg-zinc-900">menu</div>
-	<div class="flex h-full w-full flex-col">
-		<div class="h-10 w-full bg-zinc-800">
-			<Breadcrumb.Root>
-				<Breadcrumb.List>
-					<Breadcrumb.Item>
-						<p>tu madre</p>
-					</Breadcrumb.Item>
-					<Breadcrumb.Separator />
-					<Breadcrumb.Item>
-						<p>culo</p>
-					</Breadcrumb.Item>
-				</Breadcrumb.List>
-			</Breadcrumb.Root>
-		</div>
-		<div>
-			<Label for="plaintext">Text</Label>
-			<Textarea placeholder="Plaintext" id="plaintext" bind:value={text} />
+	<div class="flex w-96 items-center justify-between">
+		<h1 class="select-none text-2xl tracking-tight text-muted-foreground text-opacity-30">
+			Open Vault
+		</h1>
+		<kbd
+			class="pointer-events-none inline-flex h-10 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-muted-foreground opacity-100"
+		>
+			<span class="text-lg font-light">⌘</span>
+			<span class="text-2xl font-thin">O</span>
+		</kbd>
+	</div>
 
-			<a href="/login">login</a>
-			<a href="/test">test</a>
-
-			<Button on:click={toggleMode} variant="outline" size="icon">
-				<Sun
-					class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
-				/>
-				<Moon
-					class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
-				/>
-				<span class="sr-only">Toggle theme</span>
-			</Button>
-
-			<Button on:click={logout}>Logout</Button>
-		</div>
+	<div class="flex w-96 items-center justify-between">
+		<h1 class="select-none text-2xl tracking-tight text-muted-foreground text-opacity-30">
+			Logout
+		</h1>
+		<kbd
+			class="pointer-events-none inline-flex h-10 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-muted-foreground opacity-100"
+		>
+			<span class="text-lg font-light">⌘</span>
+			<span class="text-2xl font-thin">L</span>
+		</kbd>
 	</div>
 </div>
+
+<!-- <Button on:click={toggleMode} variant="outline" size="icon">
+	<Sun
+		class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+	/>
+	<Moon
+		class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+	/>
+	<span class="sr-only">Toggle theme</span>
+</Button> -->
+
+<!-- <Button on:click={logout}>Logout</Button> -->
