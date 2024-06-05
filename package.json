@@ -40,8 +40,13 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@cartamd/plugin-anchor": "^2.0.3",
+		"@cartamd/plugin-code": "^4.0.5",
+		"@cartamd/plugin-emoji": "^4.0.2",
+		"@cartamd/plugin-math": "^4.0.3",
 		"@tauri-apps/api": "^1.5.6",
 		"bits-ui": "^0.21.8",
+		"carta-md": "^4.1.0",
 		"clsx": "^2.1.1",
 		"cmdk-sv": "^0.0.17",
 		"formsnap": "^1.0.0",

@@ -149,3 +149,9 @@
 		{/if}
 	</Command.Dialog>
 </div>
+
+<style>
+	.app {
+		overflow: hidden;
+	}
+</style>
