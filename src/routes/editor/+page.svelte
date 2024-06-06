@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Carta, MarkdownEditor } from 'carta-md';
-	// Component default theme
 	import 'carta-md/default.css';
 
 	const carta = new Carta({
@@ -30,11 +29,11 @@
 </div>
 
 <style>
-	.editor-wrapper {
+	/* .editor-wrapper {
 		height: calc(100vh - 2.5rem);
 		border: 1px solid red !important;
 		overflow: auto;
-	}
+	} */
 	:global(.carta-editor) {
 		height: 100%;
 		max-height: calc(100vh - 2.5rem);
@@ -46,11 +45,11 @@
 
 		overflow-y: scroll;
 	}
-	:global(.carta-wrapper) {
-		/* flex-grow: 1; */
-	}
-	:global(.carta-container) {
-	}
+	/* :global(.carta-wrapper) { */
+	/* flex-grow: 1; */
+	/* } */
+	/* :global(.carta-container) {
+	} */
 	:global(.carta-input) {
 		overflow: hidden !important;
 		height: 100% !important;
