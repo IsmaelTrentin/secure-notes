@@ -1,14 +1,23 @@
+<script lang="ts">
+	import {
+		logout,
+		newFile,
+		openCmdPalette,
+		openVault,
+		openVaultFile,
+		toString
+	} from '$lib/keybinds';
+</script>
+
 <div class="flex h-full w-full flex-col items-center justify-center gap-5 bg-zinc-900">
 	<div class="flex w-96 items-center justify-between">
 		<h1 class="select-none text-2xl tracking-tight text-muted-foreground text-opacity-30">
 			Command Palette
 		</h1>
 		<kbd
-			class="pointer-events-none inline-flex h-10 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-muted-foreground opacity-100"
+			class="pointer-events-none inline-flex h-10 select-none items-center gap-1 rounded border bg-muted px-2 pr-0 font-mono text-muted-foreground opacity-100"
 		>
-			<span class="text-lg font-light">⌘</span>
-			<span class="text-2xl font-thin">↑</span>
-			<span class="text-2xl font-thin">P</span>
+			<span class="text-2xl font-thin tracking-[.37rem]">{toString(openCmdPalette)}</span>
 		</kbd>
 	</div>
 
@@ -17,10 +26,20 @@
 			New File
 		</h1>
 		<kbd
-			class="pointer-events-none inline-flex h-10 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-muted-foreground opacity-100"
+			class="pointer-events-none inline-flex h-10 select-none items-center gap-1 rounded border bg-muted px-2 pr-0 font-mono text-muted-foreground opacity-100"
 		>
-			<span class="text-lg font-light">⌘</span>
-			<span class="text-2xl font-thin">N</span>
+			<span class="text-2xl font-thin tracking-[.37rem]">{toString(newFile)}</span>
+		</kbd>
+	</div>
+
+	<div class="flex w-96 items-center justify-between">
+		<h1 class="select-none text-2xl tracking-tight text-muted-foreground text-opacity-30">
+			Open Vault File
+		</h1>
+		<kbd
+			class="pointer-events-none inline-flex h-10 select-none items-center gap-1 rounded border bg-muted px-2 pr-0 font-mono text-muted-foreground opacity-100"
+		>
+			<span class="text-2xl font-thin tracking-[.37rem]">{toString(openVaultFile)}</span>
 		</kbd>
 	</div>
 
@@ -32,7 +51,7 @@
 			class="pointer-events-none inline-flex h-10 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-muted-foreground opacity-100"
 		>
 			<span class="text-lg font-light">⌘</span>
-			<span class="text-2xl font-thin">P</span>
+			<span class="text-2xl font-thin">O</span>
 		</kbd>
 	</div>
 
@@ -41,10 +60,9 @@
 			Open Vault
 		</h1>
 		<kbd
-			class="pointer-events-none inline-flex h-10 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-muted-foreground opacity-100"
+			class="pointer-events-none inline-flex h-10 select-none items-center gap-1 rounded border bg-muted px-2 pr-0 font-mono text-muted-foreground opacity-100"
 		>
-			<span class="text-lg font-light">⌘</span>
-			<span class="text-2xl font-thin">O</span>
+			<span class="text-2xl font-thin tracking-[.37rem]">{toString(openVault)}</span>
 		</kbd>
 	</div>
 
@@ -53,10 +71,9 @@
 			Logout
 		</h1>
 		<kbd
-			class="pointer-events-none inline-flex h-10 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-muted-foreground opacity-100"
+			class="pointer-events-none inline-flex h-10 select-none items-center gap-1 rounded border bg-muted px-2 pr-0 font-mono text-muted-foreground opacity-100"
 		>
-			<span class="text-lg font-light">⌘</span>
-			<span class="text-2xl font-thin">L</span>
+			<span class="text-2xl font-thin tracking-[.37rem]">{toString(logout)}</span>
 		</kbd>
 	</div>
 </div>

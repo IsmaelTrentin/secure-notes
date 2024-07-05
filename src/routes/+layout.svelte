@@ -7,7 +7,13 @@
 	import { invoke } from '@tauri-apps/api';
 	import AuthSetup from '$lib/components/AuthSetup.svelte';
 	import { onMount } from 'svelte';
-	import keybindsManager from '$lib/keybinds';
+	import keybindsManager, {
+		logout,
+		newFile,
+		openVault,
+		openVaultFile,
+		toString
+	} from '$lib/keybinds';
 	import * as Command from '$lib/components/ui/command';
 	import Settings from 'lucide-svelte/icons/settings';
 	import File from 'lucide-svelte/icons/file';
@@ -59,12 +65,13 @@
 	<Command.Dialog
 		bind:open={$cmdPal.open}
 		filter={(value, search) => {
-			if ($cmdPal.files.length === 0 && $cmdPal.fileInput.trim().length > 0) {
-				return 1;
-			}
-			if ($cmdPal.element === 'filepicker') {
-				return value.includes(search.substring(3).trim()) ? 1 : 0;
-			}
+			console.debug(value, search);
+			// if ($cmdPal.files.length === 0 && $cmdPal.fileInput.trim().length > 0) {
+			// 	return 1;
+			// }
+			// if ($cmdPal.element === 'filepicker') {
+			// 	return value.includes(search.substring(3).trim()) ? 1 : 0;
+			// }
 
 			if (value.includes(search)) return 1;
 			return 0;
@@ -84,7 +91,7 @@
 					<Command.Item>
 						<Settings class="mr-2 h-4 w-4" />
 						<span>Open vault</span>
-						<Command.Shortcut>⌘O</Command.Shortcut>
+						<Command.Shortcut>{toString(openVault)}</Command.Shortcut>
 					</Command.Item>
 				</Command.Group>
 				<Command.Separator />
@@ -93,12 +100,17 @@
 					<Command.Item>
 						<Settings class="mr-2 h-4 w-4" />
 						<span>New file</span>
-						<Command.Shortcut>⌘N</Command.Shortcut>
+						<Command.Shortcut>{toString(newFile)}</Command.Shortcut>
+					</Command.Item>
+					<Command.Item>
+						<Settings class="mr-2 h-4 w-4" />
+						<span>Open vault file</span>
+						<Command.Shortcut>{toString(openVaultFile)}</Command.Shortcut>
 					</Command.Item>
 					<Command.Item>
 						<Settings class="mr-2 h-4 w-4" />
 						<span>Open file</span>
-						<Command.Shortcut>⌘P</Command.Shortcut>
+						<Command.Shortcut>⌘O</Command.Shortcut>
 					</Command.Item>
 					<Command.Item>
 						<Settings class="mr-2 h-4 w-4" />
@@ -118,6 +130,14 @@
 						<Settings class="mr-2 h-4 w-4" />
 						<span>Settings</span>
 						<Command.Shortcut>⌘S</Command.Shortcut>
+					</Command.Item>
+				</Command.Group>
+
+				<Command.Group heading="User">
+					<Command.Item>
+						<Settings class="mr-2 h-4 w-4" />
+						<span>Logout</span>
+						<Command.Shortcut>{toString(logout)}</Command.Shortcut>
 					</Command.Item>
 				</Command.Group>
 			</Command.List>
