@@ -1,3 +1,5 @@
-pub mod authenticate;
-pub mod logout;
-pub mod setup_auth;
+mod auth;
+mod logout;
+
+pub use auth::*;
+pub use logout::logout;

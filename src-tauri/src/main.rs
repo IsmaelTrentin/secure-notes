@@ -8,10 +8,13 @@ use std::fs::{read_to_string, write};
 use std::string::FromUtf8Error;
 use std::sync::Mutex;
 
-use commands::authenticate::{authenticate, is_authenticated};
-use commands::logout::logout;
-use commands::setup_auth::{needs_auth_setup, setup_auth};
+use commands::authenticate;
+use commands::is_authenticated;
+use commands::logout;
+use commands::needs_auth_setup;
+use commands::setup_auth;
 
+use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
 use tauri::Manager;
 
@@ -49,12 +52,15 @@ impl From<FromUtf8Error> for Error {
 
 #[derive(Serialize)]
 pub struct AppState {
+    pub conf: AppConfig,
+
+    #[serde(skip_serializing)]
+    pub db: Connection,
+
     #[serde(skip_serializing)]
     pub authenticated: bool,
-    pub conf: AppConfig,
     #[serde(skip_serializing)]
     pub needs_auth_setup: bool,
-
     #[serde(skip_serializing)]
     pub key_hash_64: Option<String>,
 }
@@ -62,6 +68,7 @@ pub struct AppState {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct AppConfig {
     pub version: String,
+    pub db_path: String,
     pub vault_paths: Vec<String>,
 }
 
@@ -76,10 +83,22 @@ fn main() {
                 std::fs::create_dir_all(&conf_path).expect("failed to create config path");
             }
 
-            let conf;
+            let data_path = app
+                .path_resolver()
+                .app_data_dir()
+                .expect("failed to resolve data path");
+            if !data_path.exists() {
+                std::fs::create_dir_all(&data_path).expect("failed to create data path");
+            }
+
+            let conf: AppConfig;
             let conf_file_path = conf_path.join("config.toml");
             if !conf_file_path.exists() {
-                let default_config = "version = \"0.0.1\"\nvault_paths = []\n";
+                let db_path = data_path.join("db.sqlite");
+                let default_config = format!(
+                    "version = \"0.0.2\"\nvault_paths = []\ndb_path=\"{}\"\n",
+                    db_path.to_str().expect("invalid os data path")
+                );
                 conf = toml::from_str(&default_config).expect("bad default config");
                 write(conf_file_path, &default_config).expect("could not create conf file");
                 println!("config file created");
@@ -105,9 +124,12 @@ fn main() {
             dbg!(&data_path);
             dbg!(&conf);
 
+            let db = Connection::open(&conf.db_path)?;
+
             app.manage(Mutex::new(AppState {
-                authenticated: false,
                 conf,
+                db,
+                authenticated: false,
                 needs_auth_setup,
                 key_hash_64: None,
             }));
