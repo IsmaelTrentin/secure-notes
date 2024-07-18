@@ -7,6 +7,7 @@
 	import { invoke } from '@tauri-apps/api';
 	import AuthSetup from '$lib/components/AuthSetup.svelte';
 	import { onMount } from 'svelte';
+	import { open } from '@tauri-apps/api/dialog';
 	import keybindsManager, {
 		logout,
 		newFile,
@@ -16,9 +17,20 @@
 	} from '$lib/keybinds';
 	import * as Command from '$lib/components/ui/command';
 	import Settings from 'lucide-svelte/icons/settings';
+	import Vault from 'lucide-svelte/icons/vault';
+	import Plus from 'lucide-svelte/icons/plus';
+	import type { Vault as VaultType } from '$lib/stores/vault.picker';
 	import File from 'lucide-svelte/icons/file';
 	import FilePen from 'lucide-svelte/icons/file-pen';
 	import { cmdPal } from '$lib/stores/cmdpal';
+	import { Toaster } from '$lib/components/ui/sonner';
+	import { vaultPicker } from '$lib/stores/vault.picker';
+	import { goto } from '$app/navigation';
+
+	let cmdValue: string | undefined;
+	// $: console.log('VALUE', cmdValue);
+
+	invoke<VaultType[]>('get_vaults').then((vaults) => ($vaultPicker.vaults = [...vaults]));
 
 	let needs_auth_setup = false;
 	const fetchAuthState = async () => {
@@ -43,9 +55,35 @@
 		return keybindsManager.init();
 	});
 
-	$: if (!open) {
+	const onOpenVault = (vault: VaultType) => {
+		console.log(vault);
+		$app.vault = vault;
+		localStorage.setItem('app.vault', JSON.stringify(vault));
+
+		$vaultPicker.open = false;
+		$cmdPal.open = false;
+		goto('/editor');
+	};
+	const onNewVault = async () => {
+		const selected = await open({
+			multiple: false,
+			directory: true
+		});
+
+		if (!selected) {
+			return;
+		}
+
+		const vault = await invoke<VaultType>('add_vault', { path: selected });
+		vaultPicker.update((ps) => ({ ...ps, vaults: [...ps.vaults, vault] }));
+	};
+
+	$: if (!$cmdPal.open) {
 		$cmdPal.cmdInput = '';
 		$cmdPal.fileInput = '';
+	}
+	$: if (!$vaultPicker.open) {
+		$vaultPicker.value = undefined;
 	}
 </script>
 
@@ -63,6 +101,7 @@
 	{/if}
 
 	<Command.Dialog
+		bind:value={cmdValue}
 		bind:open={$cmdPal.open}
 		filter={(value, search) => {
 			console.debug(value, search);
@@ -88,9 +127,14 @@
 			<Command.List>
 				<Command.Empty>No results found.</Command.Empty>
 				<Command.Group heading="Vaults">
-					<Command.Item>
+					<Command.Item
+						onSelect={() => {
+							// $cmdPal.open = false;
+							$vaultPicker.open = true;
+						}}
+					>
 						<Settings class="mr-2 h-4 w-4" />
-						<span>Open vault</span>
+						<span>Open vault picker</span>
 						<Command.Shortcut>{toString(openVault)}</Command.Shortcut>
 					</Command.Item>
 				</Command.Group>
@@ -134,7 +178,14 @@
 				</Command.Group>
 
 				<Command.Group heading="User">
-					<Command.Item>
+					<Command.Item
+						onSelect={async () => {
+							$cmdPal.open = false;
+							$vaultPicker.open = false;
+							await invoke('logout');
+							$app.authed = false;
+						}}
+					>
 						<Settings class="mr-2 h-4 w-4" />
 						<span>Logout</span>
 						<Command.Shortcut>{toString(logout)}</Command.Shortcut>
@@ -168,6 +219,36 @@
 			</Command.List>
 		{/if}
 	</Command.Dialog>
+
+	<Command.Dialog
+		bind:open={$vaultPicker.open}
+		bind:value={$vaultPicker.value}
+		loop
+		closeOnEscape
+		closeOnOutsideClick
+	>
+		<Command.Input placeholder="Search vault" autofocus />
+		<Command.List>
+			<Command.Empty>No vaults found</Command.Empty>
+			<Command.Group heading="Vaults">
+				{#each $vaultPicker.vaults as vault}
+					<Command.Item onSelect={() => onOpenVault(vault)}>
+						<Vault class="mr-2 h-4 w-4" />
+						<span>{vault.name}</span>
+						<Command.Shortcut>{vault.path}</Command.Shortcut>
+					</Command.Item>
+				{/each}
+			</Command.Group>
+			<Command.Group heading="New vault">
+				<Command.Item onSelect={onNewVault}>
+					<Plus class="mr-2 h-4 w-4" />
+					<span>Add a new vault</span>
+				</Command.Item>
+			</Command.Group>
+		</Command.List>
+	</Command.Dialog>
+
+	<Toaster />
 </div>
 
 <style>

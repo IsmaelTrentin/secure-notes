@@ -1,21 +1,28 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod app_config;
 mod commands;
+mod db;
 mod security;
 
-use std::fs::{read_to_string, write};
 use std::string::FromUtf8Error;
 use std::sync::Mutex;
 
+use app_config::{ensure_config_dir, read_config, AppConfig};
+use commands::add_vault;
 use commands::authenticate;
+use commands::get_config;
+use commands::get_vaults;
 use commands::is_authenticated;
 use commands::logout;
 use commands::needs_auth_setup;
+use commands::reload_config;
 use commands::setup_auth;
 
+use db::setup_db;
 use rusqlite::Connection;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use tauri::Manager;
 
 #[derive(Debug, thiserror::Error)]
@@ -30,6 +37,10 @@ pub enum Error {
     Unauthorized,
     #[error("bad utf8 data")]
     FromUtf8Error,
+    #[error("bad config")]
+    BadConfig(String),
+    #[error("SQL error")]
+    SqlError(#[from] rusqlite::Error),
 }
 impl serde::Serialize for Error {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -65,23 +76,10 @@ pub struct AppState {
     pub key_hash_64: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct AppConfig {
-    pub version: String,
-    pub db_path: String,
-    pub vault_paths: Vec<String>,
-}
-
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
-            let conf_path = app
-                .path_resolver()
-                .app_config_dir()
-                .expect("failed to resolve config path");
-            if !conf_path.exists() {
-                std::fs::create_dir_all(&conf_path).expect("failed to create config path");
-            }
+            let conf_path = ensure_config_dir(app);
 
             let data_path = app
                 .path_resolver()
@@ -91,24 +89,7 @@ fn main() {
                 std::fs::create_dir_all(&data_path).expect("failed to create data path");
             }
 
-            let conf: AppConfig;
-            let conf_file_path = conf_path.join("config.toml");
-            if !conf_file_path.exists() {
-                let db_path = data_path.join("db.sqlite");
-                let default_config = format!(
-                    "version = \"0.0.2\"\nvault_paths = []\ndb_path=\"{}\"\n",
-                    db_path.to_str().expect("invalid os data path")
-                );
-                conf = toml::from_str(&default_config).expect("bad default config");
-                write(conf_file_path, &default_config).expect("could not create conf file");
-                println!("config file created");
-            } else {
-                let config_data =
-                    read_to_string(conf_file_path).expect("failed to read config file");
-                conf = toml::from_str(&config_data).expect("bad config");
-                println!("read config file ok");
-            }
-
+            let mut conf = read_config(&conf_path.join("config.toml")).unwrap();
             let data_path = app
                 .path_resolver()
                 .app_data_dir()
@@ -116,6 +97,10 @@ fn main() {
             if !data_path.exists() {
                 std::fs::create_dir_all(&data_path).expect("failed to create data path");
             }
+
+            conf.db_path = conf
+                .db_path
+                .replace("<data>", &data_path.display().to_string());
 
             let auth_file_path = data_path.join("master.auth");
             let needs_auth_setup = !auth_file_path.exists();
@@ -125,6 +110,9 @@ fn main() {
             dbg!(&conf);
 
             let db = Connection::open(&conf.db_path)?;
+            println!("running db init queries...");
+            setup_db(&db)?;
+            println!("db init done");
 
             app.manage(Mutex::new(AppState {
                 conf,
@@ -137,11 +125,18 @@ fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            // auth
             authenticate,
             is_authenticated,
-            logout,
             needs_auth_setup,
-            setup_auth
+            setup_auth,
+            logout,
+            // config
+            get_config,
+            reload_config,
+            // vaults
+            get_vaults,
+            add_vault,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1,6 +1,17 @@
 <script lang="ts">
 	import { Carta, MarkdownEditor } from 'carta-md';
 	import 'carta-md/default.css';
+	import { app } from '$lib/stores/app';
+	import { goto } from '$app/navigation';
+
+	if ($app.vault == undefined) {
+		const cache = localStorage.getItem('app.vault');
+		if (cache) {
+			$app.vault = JSON.parse(cache);
+		} else {
+			goto('/');
+		}
+	}
 
 	const carta = new Carta({
 		sanitizer: false
@@ -8,7 +19,7 @@
 </script>
 
 <div class="flex h-full w-full">
-	<div class="h-full w-[17rem] min-w-[17rem] overflow-y-auto">tree</div>
+	<div class="h-full w-[17rem] min-w-[17rem] overflow-y-auto">{$app.vault?.name}</div>
 	<div class="h-full flex-grow">
 		<div class="h-10 w-full"></div>
 		<!-- <div

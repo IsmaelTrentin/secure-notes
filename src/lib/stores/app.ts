@@ -1,8 +1,10 @@
 import { writable } from 'svelte/store';
+import type { Vault } from './vault.picker';
 
 export type App = {
 	authed: boolean;
 	loading: boolean;
+	vault?: Vault;
 };
 
 function createApp() {
@@ -10,11 +12,9 @@ function createApp() {
 
 	return {
 		subscribe,
+		update,
 		set(newState: App) {
 			set(newState);
-		},
-		update(newState: App) {
-			update((old) => ({ ...old, ...newState }));
 		}
 	};
 }
