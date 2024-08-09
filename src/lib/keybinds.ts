@@ -86,7 +86,6 @@ export const openVault = register('<s>O', (e) => {
 });
 export const newFile = register('<s>n', async (e) => {
 	e.preventDefault();
-	await goto('/editor');
 });
 export const closeFIle = register('<s>w', (e) => {
 	e.preventDefault();

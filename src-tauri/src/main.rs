@@ -13,6 +13,7 @@ use app_config::{ensure_config_dir, read_config, AppConfig};
 use commands::add_vault;
 use commands::authenticate;
 use commands::get_config;
+use commands::get_vault_entries;
 use commands::get_vaults;
 use commands::is_authenticated;
 use commands::logout;
@@ -137,6 +138,7 @@ fn main() {
             // vaults
             get_vaults,
             add_vault,
+            get_vault_entries
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -19,7 +19,7 @@
 	import Settings from 'lucide-svelte/icons/settings';
 	import Vault from 'lucide-svelte/icons/vault';
 	import Plus from 'lucide-svelte/icons/plus';
-	import type { Vault as VaultType } from '$lib/stores/vault.picker';
+	import type { VaultEntry, Vault as VaultType } from '$lib/stores/vault.picker';
 	import File from 'lucide-svelte/icons/file';
 	import FilePen from 'lucide-svelte/icons/file-pen';
 	import { cmdPal } from '$lib/stores/cmdpal';
@@ -55,14 +55,17 @@
 		return keybindsManager.init();
 	});
 
-	const onOpenVault = (vault: VaultType) => {
-		console.log(vault);
-		$app.vault = vault;
-		localStorage.setItem('app.vault', JSON.stringify(vault));
-
+	const onOpenVault = async (vault: VaultType) => {
 		$vaultPicker.open = false;
 		$cmdPal.open = false;
-		goto('/editor');
+
+		console.log(vault);
+		localStorage.setItem('app.vault', JSON.stringify(vault));
+
+		const data = await invoke<VaultEntry>('get_vault_entries', { vaultPath: vault.path });
+
+		vault.entries = data.children;
+		$app.vault = vault;
 	};
 	const onNewVault = async () => {
 		const selected = await open({
@@ -87,7 +90,7 @@
 	}
 </script>
 
-<div class="app h-full">
+<div class="app h-full text-zinc-400">
 	<ModeWatcher />
 
 	{#if needs_auth_setup}
@@ -250,9 +253,3 @@
 
 	<Toaster />
 </div>
-
-<style>
-	.app {
-		overflow: hidden;
-	}
-</style>
